@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 CPI_data <- read.csv("C:/Users/15654/Documents/US CPI.csv")
+cpi <- CPI_data$CPI
+cpi_ts <- ts(cpi, start = c(1913, 1), end = c(2021, 01), frequency = 12)
 ```
 
 ## PART 1 - Time Series and Autocorrelation
@@ -26,7 +28,6 @@ The question we are trying to answer is, "How was inflation, as measured by the 
 We got our dataset from Kaggle. The data used in this analysis is sourced from the U.S. Bureau of Labor Statistics, and the specific dataset is owned and managed by Arpit Verma. 
 Verma, Arpit. (2021). *U.S. Inflation Data* [Data set]. https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021/data 
 
-
 \textcolor{blue}{(c) First check for completeness and consistency of the data (if there are NAs or missing observations, replace with the value of the previous observation; make a note of this)}
 
 ```{r}
@@ -40,7 +41,7 @@ The output of integer(0) signifies that the data is complete and there are no mi
 library(ggplot2)
 
 ggplot(CPI_data, aes(x = CPI)) +
-  geom_histogram(aes(y = ..density..), bins = 30, fill = "skyblue", color = "black") +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "skyblue", color = "black") +
   geom_density(color = "red", linewidth = 1) +
   labs(title = "Histogram of CPI with Density Curve", x = "CPI", y = "Density")
 
@@ -58,6 +59,8 @@ summary(CPI_data)
 The boxplot shows that the median lies closer to the bottom of the interquartile range. The whiskers extend toward higher CPI values, but there are no outliers. 
 
 The median is 33.10 while the mean is 82.64, which is much greater than the median, reinforcing that the data is right skewed. The range is 263.3, and the IQR is 130.3. We did not conduct a cross-correlation because our data analysis is univariate. 
+
+
 
 2. Exploratory Data Analysis
 
@@ -97,7 +100,8 @@ tsdisplay(cpi_diff, main="CPI Time Series")
 adf.test(cpi_diff)
 ```
 
-The CPI time series fluctuates around a mean of 0 with no clear trend, which is a sign of stationarity. However, variance appears to increase slightly over time, especially after the 1980s, possibly reflecting heteroskedasticity. The shape of the ACF shows no significance pattern or sign of decay. The PACF shows several significant negative spikes up to around lag 10–12. 
+The CPI time series fluctuates around a mean of 0 with no clear trend, which is a sign of stationarity. However, variance appears to increase slightly over time, especially after the 1980s, possibly reflecting heteroskedasticity. The shape of the ACF shows no significance pattern or sign of decay. The PACF shows several significant negative spikes up to around lag 10–12.
+
 
 3. Feature Generation, Model Testing and Forecasting
 
@@ -130,6 +134,80 @@ AR_1 <- dynlm(cpi_diff ~ L(cpi_diff, 1:save_p), data = cpi_diff)
 summary (AR_1)
 ```
 We obtained an AR(11) model according to the SC values. The lowest SC value was on the 11th lag, which the value was -2.149196. Since our data is modeled monthly, this value can be interpreted to say that approximately the past 11 months of CPI value influences the current CPI.  
+
+\textcolor{blue}{(b) Plot and comment on the ACF of the residuals of the model chosen in 3(a). If the model is properly fit, then we should see no autocorrelations in the residuals. Carry out a formal test for autocorrelation and comment on the results}.
+
+```{r}
+resid <- residuals(AR_1)
+acf(resid, main = "ACF of Residuals from AR(11) Model")
+library(lmtest)
+bgtest(AR_1, order = 11)
+```
+
+There is only one significant spike at the first lag, so there is no significant autocorrelation as seen by the ACF of the residuals. However, the BG test tells us there is autocorrelation as seen by the small p-value of 0.001381 less than the significant value of 0.05. To fix this autocorrelation, we have to use the Newey West method to correct for the standard errors. 
+
+```{r}
+library(sandwich)
+thefix <- coeftest(AR_1, vcov. = NeweyWest(AR_1))
+summary(thefix)
+```
+
+\textcolor{blue}{(c) Using the appropriate predictors, fit an ARDL(p,q) model to the data and repeat step (b) in part 3.}
+
+```{r}
+
+results <- data.frame(p = integer(), q = integer(), BIC = numeric())
+
+for (p in 1:20) {
+  for (q in 0:5) {
+    formula_str <- paste0(
+      "cpi_ts ~ ",
+      "L(cpi_ts, 1:", p, ")",
+      if (q >= 0) paste0(" + L(time(cpi_ts), 0:", q, ")") else ""
+    )
+
+model <- dynlm(as.formula(formula_str))
+
+results <- rbind(results, data.frame(p = p, q = q, BIC = BIC(model)))
+  }
+}
+
+best_row <- results[which.min(results$BIC), ]
+cat("Best ARDL(p,q): (", best_row$p, ",", best_row$q, ") with BIC =", 
+    round(best_row$BIC, 2), "\n")
+```
+
+
+The results reveal an ARDL(13,0) model. Since we only have one variable other than time, we had use lagged values of CPI and the time to create an ARDL model. 
+
+```{r}
+ARDL <- dynlm(cpi_ts ~ L(cpi_ts, 1:13) + time(cpi_ts))
+summary (ARDL)
+```
+
+```{r}
+resid1 <- residuals(ARDL)
+acf(resid, main = "Residuals from ARDL(13,0) Model")
+library(lmtest)
+bgtest(ARDL, order = 13)
+```
+There is only one significant spike at the first lag, so there is no significant autocorrelation as seen by the ACF of the residuals. However, the BG test tells us there is autocorrelation as seen by the small p-value of 1.348e-08 less than the significant value of 0.05. To fix this autocorrelation, we have to use the Newey West method to correct for the standard errors. 
+
+```{r}
+thefix1 <- coeftest(ARDL, vcov. = NeweyWest(ARDL))
+summary(thefix1)
+```
+
+
+4. Provide a brief summary of your findings and state which model performs better.
+
+We came to conclusion with two models: AR(11) and ARDL(13,0). While the ARDL(13,0) model provided the best in-sample fit as seen by high value of the adjusted R squared, the analysis of its residuals showed autocorrelation. This may have resulted from overfitting. The AR(11) model also showed autocorrelation as seen by the results in the BG test, but its residual behavior seems to be cleaner than the ARDL(13,0) model. Additionally, the SC/BIC level for the AR(11) model was much less than than for the ARDL(13,0) model, so the AR(11) model performs better. 
+
+5. Suggest any limitations faced or improvements which could’ve been made to the model based on your findings, which should be supplemented with statistical tests(eg. degree of freedom restrictions, reverse causality).
+
+The results of the ADF test indicate that the time series data for CPI are non-stationary. This suggests that the model may not adequately capture trends or seasonal changes in the data. As seen by the values of the Breusch-Godfrey test, there is autocorrelation in the residuals, which is a violation of the assumption of no autocorrelation. Lastly, there are fundamental limitations of this model because only CPI and time are used. Excluding macroeconomic components such as unemployment and money supply may bias coefficients. Seasonality may also have an impact because CPI changes seasonally.
+
+We may use the moving average (MA) models to fix the error of autocorrelation. However, it is important to validate the necessity of the MA by confirming sharp declines in AIC and BIC indicators. Our AR(11) model did have a negative SV value, but it was a small negative value that may not be sufficient enough to consider using the MA model. 
 
 
 
