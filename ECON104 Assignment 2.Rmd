@@ -97,3 +97,39 @@ tsdisplay(cpi_diff, main="CPI Time Series")
 adf.test(cpi_diff)
 ```
 
+The CPI time series fluctuates around a mean of 0 with no clear trend, which is a sign of stationarity. However, variance appears to increase slightly over time, especially after the 1980s, possibly reflecting heteroskedasticity. The shape of the ACF shows no significance pattern or sign of decay. The PACF shows several significant negative spikes up to around lag 10–12. 
+
+3. Feature Generation, Model Testing and Forecasting
+
+\textcolor{blue}{(a) Fit an AR(p) model to the data (using part 2(a), AIC or some built in R function) and describe the model obtained.}
+
+```{r}
+library(dynlm)
+SC <- 9999
+results <- matrix("", nrow = 15, ncol = 1)
+for (p in 1:15) {
+  mdl <- dynlm(cpi_diff ~ L(cpi_diff, 1:p), data = cpi_diff)
+  N <- nobs(mdl)
+k <- 1 + p
+ SC_new <- log(sum(mdl$residuals^2) / N) + k * log(N) / N
+  if (SC_new < SC) {
+    save_p <- p
+    SC <- SC_new
+  }
+    results[p, 1] <- SC_new
+}
+
+results <- as.numeric(results)
+selected_lag <- which.min(results)
+
+print(results)
+
+```
+```{r}
+AR_1 <- dynlm(cpi_diff ~ L(cpi_diff, 1:save_p), data = cpi_diff)
+summary (AR_1)
+```
+We obtained an AR(11) model according to the SC values. The lowest SC value was on the 11th lag, which the value was -2.149196. Since our data is modeled monthly, this value can be interpreted to say that approximately the past 11 months of CPI value influences the current CPI.  
+
+
+
