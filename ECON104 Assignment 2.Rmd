@@ -57,7 +57,7 @@ summary(CPI_data)
 ```
 The boxplot shows that the median lies closer to the bottom of the interquartile range. The whiskers extend toward higher CPI values, but there are no outliers. 
 
-The median is 33.10 while the mean is 82.64, which is much greater than the median, reinforcing that the data is right skewed. The range is 263.3, and the IQR is 130.3. 
+The median is 33.10 while the mean is 82.64, which is much greater than the median, reinforcing that the data is right skewed. The range is 263.3, and the IQR is 130.3. We did not conduct a cross-correlation because our data analysis is univariate. 
 
 
 
