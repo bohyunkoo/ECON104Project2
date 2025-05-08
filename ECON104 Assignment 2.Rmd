@@ -27,6 +27,14 @@ We got our dataset from Kaggle. The data used in this analysis is sourced from t
 Verma, Arpit. (2021). *U.S. Inflation Data* [Data set]. https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021/data 
 
 
+\textcolor{blue}{(c) First check for completeness and consistency of the data (if there are NAs or missing observations, replace with the value of the previous observation; make a note of this)}
+
+```{r}
+which(is.na(CPI_data))
+```
+The output of integer(0) signifies that the data is complete and there are no missing observations.
+
+\textcolor{blue}{(d) Provide descriptive analyses of your variables. This should include the histogram with overlying density, boxplots, cross correlation. All figures/statistics must include comments.}
 
 
 
