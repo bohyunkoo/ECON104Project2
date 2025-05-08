@@ -1,0 +1,34 @@
+---
+title: "ECON104 Assignment 2"
+author: "Ahjin Kim, Jimin Kim, Bohyun Koo, Miguel Luis Martinez"
+date: "May 12, 2025"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+CPI_data <- read.csv("C:/Users/15654/Documents/US CPI.csv")
+```
+
+## PART 1 - Time Series and Autocorrelation
+
+1. Exploratory Data Analysis
+
+\textcolor{blue}{(a) Briefly discuss the question you are trying to answer.}
+
+The question we are trying to answer is, "How was inflation, as measured by the Consumer Price Index (CPI), evolved over time, and what model best captures its underlying dynamics for forecasting purposes?"
+
+\textcolor{blue}{(b) Cite the dataset and give a summary of what the dataset is about; make sure it is a time-series.}
+
+We got our dataset from Kaggle. The data used in this analysis is sourced from the U.S. Bureau of Labor Statistics, and the specific dataset is owned and managed by Arpit Verma. 
+Verma, Arpit. (2021). *U.S. Inflation Data* [Data set]. https://www.kaggle.com/datasets/varpit94/us-inflation-data-updated-till-may-2021/data 
+
+
+
+
+
+
+
