@@ -59,5 +59,27 @@ The boxplot shows that the median lies closer to the bottom of the interquartile
 
 The median is 33.10 while the mean is 82.64, which is much greater than the median, reinforcing that the data is right skewed. The range is 263.3, and the IQR is 130.3. We did not conduct a cross-correlation because our data analysis is univariate. 
 
+2. Exploratory Data Analysis
+
+\textcolor{blue}{(a) With tsdisplay or ggtsdisplay, for each variable, use its time series plot, ACF and PACF to comment on its stationarity (you can also decompose the time series; note if there is seasonality). To supplement this, use the appropriate Dickey-Fuller (unit root) test, to determine whether or not it is stationary. Note using its PACF what the suspected order might be.}
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(forecast)
+library(tseries)
+library(ggfortify)
+library(ggpubr)
+
+tsdisplay(cpi_ts, main="Original CPI Time Series")
+```
+
+There is a clear upward trend in CPI over time, which shows that the data is non-stationary because this would violate the stationarity assumption that mean is constant over time. The autocorrelation function (ACF) remains very high (close to 1) for all lags and decays slowly, which is a sign of non-stationarity. 
+
+```{r}
+adf.test(cpi_ts)
+```
+The Augmented Dickey-Fuller Test supports our conclusion of non-stationarity. The null hypothesis of this test is that the data is non-stationary. The p-value of 0.9881 is greater than the significant value of 0.05, so we fail to reject the null hypothesis and come to the conclusion that our data is not stationary. 
+
 
 
