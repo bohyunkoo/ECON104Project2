@@ -36,7 +36,28 @@ The output of integer(0) signifies that the data is complete and there are no mi
 
 \textcolor{blue}{(d) Provide descriptive analyses of your variables. This should include the histogram with overlying density, boxplots, cross correlation. All figures/statistics must include comments.}
 
+```{r histogram-density, echo=TRUE}
+library(ggplot2)
 
+ggplot(CPI_data, aes(x = CPI)) +
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "skyblue", color = "black") +
+  geom_density(color = "red", linewidth = 1) +
+  labs(title = "Histogram of CPI with Density Curve", x = "CPI", y = "Density")
+
+```
+The distribution of CPI values is right-skewed. This reflects the cumulative nature of inflation, with CPI values increasing over the years. The density curve peaks on the left, then tapers off toward the right, reinforcing the right-skewed nature of the data.
+
+
+```{r}
+ggplot(CPI_data, aes(x=CPI)) +
+  geom_boxplot(fill="lightblue", color="darkgreen") +
+  labs(title="Boxplot of CPI", x="CPI")
+
+summary(CPI_data)
+```
+The boxplot shows that the median lies closer to the bottom of the interquartile range. The whiskers extend toward higher CPI values, but there are no outliers. 
+
+The median is 33.10 while the mean is 82.64, which is much greater than the median, reinforcing that the data is right skewed. The range is 263.3, and the IQR is 130.3. 
 
 
 
