@@ -81,5 +81,19 @@ adf.test(cpi_ts)
 ```
 The Augmented Dickey-Fuller Test supports our conclusion of non-stationarity. The null hypothesis of this test is that the data is non-stationary. The p-value of 0.9881 is greater than the significant value of 0.05, so we fail to reject the null hypothesis and come to the conclusion that our data is not stationary. 
 
+\textcolor{blue}{(b) If it is not stationary, determine the level of differencing to make our series stationary. We can use the ndiffs function which performs a unit-root test to determine this. After this, difference your data to ascertain a stationary time series. Re-do part a) for your differenced time series and comment on the time series plot, ACF and PACF. Recall that the time series models we’ve observed rely on stationarity.}
 
+```{r}
+ndiffs(cpi_ts)
+```
+```{r}
+cpi_diff <- diff(cpi_ts, differences = 2)
+```
+
+The level of differencing to make our series stationary is 2. 
+
+```{r}
+tsdisplay(cpi_diff, main="CPI Time Series")
+adf.test(cpi_diff)
+```
 
