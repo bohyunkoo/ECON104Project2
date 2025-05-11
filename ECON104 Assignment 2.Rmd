@@ -309,3 +309,29 @@ boxplot(diab_data$bmi, main = "Boxplot of BMI", col = "lightblue",
 summary(diab_data$bmi)
 ```
 BMI (Body Mass Index) is a measure of body fat based on weight and height. Higher BMI values are linked to a higher risk of diabetes. BMI less than 18.5 is underweight, 18.5-24.9 is normal, 25-29.9 is overweight, and 30 or more is obese. The range of BMI in the dataset is from 10.01 to 95.69, and the IQR is 5.95. The histogram is approximately bell-shaped with a slight right skew. Most values are centered around the median of 27.32, but the tail on the right side extends further, indicating the presence of individuals with unusually high BMI values. The boxplot reveals that there are many outliers, both on the lower and higher sides. The mean is also 27.32, equal to the median. 
+
+\textcolor{blue}{(c) Fit the three models (Linear Probability Model, Logit Model, and Probit Model), and identify which model is your preferred one and why. Make sure to include statistical diagnostics to support your conclusion, and to comment on your findings.}
+
+```{r}
+lpm_model <- lm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
+                data = diab_data)
+summary(lpm_model)
+
+logit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
+                   data = diab_data, family = binomial(link = "logit"))
+summary(logit_model)
+
+probit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
+                    data = diab_data, family = binomial(link = "probit"))
+summary(probit_model)
+
+comparison <- data.frame(
+  Model = c("LPM", "Logit", "Probit"),
+  AIC = c(AIC(lpm_model), AIC(logit_model), AIC(probit_model)),
+  BIC = c(BIC(lpm_model), BIC(logit_model), BIC(probit_model)),
+  Pseudo_R2 = c(NA, pR2(logit_model)["McFadden"], pR2(probit_model)["McFadden"])
+)
+
+comparison
+
+```
