@@ -316,6 +316,9 @@ BMI (Body Mass Index) is a measure of body fat based on weight and height. Highe
 lpm_model <- lm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
                 data = diab_data)
 summary(lpm_model)
+bptest(lpm_model)
+hcErrors <- coeftest(lpm_model, vcov.=hccm(lpm_model, type = "hc1"))
+hcErrors
 
 logit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
                    data = diab_data, family = binomial(link = "logit"))
