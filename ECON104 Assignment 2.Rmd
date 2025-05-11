@@ -210,4 +210,102 @@ The results of the ADF test indicate that the time series data for CPI are non-s
 We may use the moving average (MA) models to fix the error of autocorrelation. However, it is important to validate the necessity of the MA by confirming sharp declines in AIC and BIC indicators. Our AR(11) model did have a negative SV value, but it was a small negative value that may not be sufficient enough to consider using the MA model. 
 
 
+## PART 2 - Time Series and Autocorrelation
 
+Binary Dependent Variables
+
+```{r}
+diab_data <- read.csv("C:/Users/15654/Documents/diabetes_prediction_dataset.csv")
+
+```
+
+\textcolor{blue}{(a) Briefly discuss your data and the question you are trying to answer with your model.}
+
+We got our dataset from Kaggle. The data used in this analysis is sourced from the Electronic Health Records (EHRs), and the specific dataset is owned and managed by Mohammed Mustafa. 
+Mustafa, Mohammed. (2023). *Diabetes prediction dataset* [Data set]. https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset?resource=download
+
+The question we are trying to answer is, "Can we predict whether a person has diabetes based on their health and demographic features?" This data set is a binary classification that estimates the likelihood that a person is diabetic based on features such as age, BMI, and health measures. The explanatory variables include age, gender, hypertension, heart disease, smoking history, and BMI. Age is a continuous variable, ranging from 0 to 80 in this data set. Gender is a categorical variable; there is male, female, and other. Hypertension is a binary variable where 0 indicates the individual doesn’t have hypertension, and 1 indicates that the individual has hypertension. Heart disease is also a binary variable where 0 indicates the individual doesn’t have heart disease, and 1 indicates that the individual has a heart disease. Smoking history is a categorical variable with categories of not current, former, no info, current, never, and ever. Body mass index (BMI) is a continuous variable. BMI less than 18.5 is underweight, 18.5-24.9 is normal, 25-29.9 is overweight, and 30 or more is obese.
+
+The binary dependent variable is whether a person has diabetes or not, with values of 1 indicating the presence of diabetes and 0 indicating the absence of diabetes. 
+
+\textcolor{blue}{(b) Provide a descriptive analysis of your variables. This should include RELEVANT histograms and fitted distributions, correlation plot, boxplots, scatterplots, and statistical summaries (e.g., the five-number summary). All figures must include comments. For binary variables, you can simply include the proportions of each factor.}
+
+\textcolor{blue}{Age}
+```{r age, fig.width=5, fig.height=4}
+library(ggplot2)
+ggplot(diab_data, aes(x = age)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "skyblue", 
+                 color = "black") +
+  geom_density(color = "red", linewidth = 1) +
+  labs(title = "Histogram of Age with Density Curve", x = "Age", y = "Density")
+
+boxplot(diab_data$age, main = "Boxplot of Age", col = "lightblue")
+
+summary(diab_data$age)
+```
+The age variable is an important factor as diabetes is more commonly diagnosed in older adults. The histogram appears to be slightly bimodal, and skewed slightly to the right. As seen from the boxplot and the five number summary, age ranges from 0-80 in this data set, and the IQR is 36. There are no outliers. There is a mean of 41.89 and a median of 43. 
+
+\textcolor{blue}{Gender}
+```{r gender, fig.width=5, fig.height=4}
+
+ggplot(diab_data, aes(x = gender)) +
+  geom_bar(fill = "lightblue") +
+  ggtitle("Gender Distribution")
+
+prop.table(table(diab_data$gender)) * 100
+```
+Gender can have an impact on their susceptibility to diabetes. There are three categories: male, female, and other. 58.55\% of the individuals are female, 41.43\% are male, and 1.8% selected "other" as their classification of gender. 
+
+\textcolor{blue}{Hypertension}
+```{r hypertension, fig.width=5, fig.height=4}
+
+ggplot(diab_data, aes(x = factor(hypertension))) +
+  geom_bar(fill = "lightblue") +
+  xlab("Hypertension (0 = No, 1 = Yes)") +
+  ylab("Count") +
+  ggtitle("Hypertension")
+
+prop.table(table(diab_data$hypertension)) * 100
+```
+Hypertension is a medical condition in which the blood pressure in the arteries is persistently elevated. It has values of 0 or 1 where 0 indicates the individual doesn’t have hypertension, and 1 indicates that they have hypertension. 92.515\% of the individuals responded that they do not have hypertension, and 7.485\% of the individuals responded that they do have hypertension. 
+
+\textcolor{blue}{Heart Disease}
+```{r heart disease, fig.width=5, fig.height=4}
+
+ggplot(diab_data, aes(x = factor(heart_disease))) +
+  geom_bar(fill = "lightblue") +
+  xlab("Heart Disease (0 = No, 1 = Yes)") +
+  ylab("Count") +
+  ggtitle("Heart Disease")
+
+prop.table(table(diab_data$heart_disease)) * 100
+```
+
+Heart disease is another medical condition that is associated with an increased risk of developing diabetes. It is a binary variable where 0 indicates the individual doesn’t have heart disease, and 1 indicates that the individual has a heart disease. 96.058\% of the individuals responded that they do not have a heart disease, and 3.942\% of the individuals responded that they do have heart disease. 
+
+\textcolor{blue}{Smoking History|
+```{r smoking, fig.width=5, fig.height=4}
+
+ggplot(diab_data, aes(x = smoking_history)) +
+  geom_bar(fill = "lightblue") +
+  ggtitle("Smoking History")
+
+prop.table(table(diab_data$smoking_history)) * 100
+```
+Smoking history is considered a risk factor for diabetes. There are 6 categories: not current, former, never, and ever, no info, and not current. The category "Current" indicates that the individual is actively smoking or has reported smoking recently. The category "not current" refers to individuals who used to smoke but are currently not smoking. The category "former" refers to individuals who used to smoke but are currently not smoking and have been abstinent for a longer period of time than those in the "not current" category. The category "never" refers to individuals who have never smoked in their life. The category "Ever" represents individuals who have ever smoked in their lifetime, regardless of their current smoking status. 9.286\% of the individuals responded that they are current smokers, while 9.352\% are former smokers. 35.095\% have never smoked, and 35.816\% gave no information regarding their smoking history. 6.447\% responded that they are no longer smokers, and 4.004\% have smoked at least once in their life. 
+
+\textcolor{blue}{Body Mass Index (BMI)}
+```{r BMI, fig.width=5, fig.height=4}
+library(ggplot2)
+ggplot(diab_data, aes(x = bmi)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "skyblue", 
+                 color = "black") +
+  geom_density(color = "red", linewidth = 1) +
+  labs(title = "Histogram of BMI with Density Curve", x = "BMI", y = "Density")
+
+boxplot(diab_data$bmi, main = "Boxplot of BMI", col = "lightblue", 
+        horizontal = TRUE)
+
+summary(diab_data$bmi)
+```
+BMI (Body Mass Index) is a measure of body fat based on weight and height. Higher BMI values are linked to a higher risk of diabetes. BMI less than 18.5 is underweight, 18.5-24.9 is normal, 25-29.9 is overweight, and 30 or more is obese. The range of BMI in the dataset is from 10.01 to 95.69, and the IQR is 5.95. The histogram is approximately bell-shaped with a slight right skew. Most values are centered around the median of 27.32, but the tail on the right side extends further, indicating the presence of individuals with unusually high BMI values. The boxplot reveals that there are many outliers, both on the lower and higher sides. The mean is also 27.32, equal to the median. 
