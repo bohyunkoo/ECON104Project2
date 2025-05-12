@@ -313,21 +313,28 @@ BMI (Body Mass Index) is a measure of body fat based on weight and height. Highe
 \textcolor{blue}{(c) Fit the three models (Linear Probability Model, Logit Model, and Probit Model), and identify which model is your preferred one and why. Make sure to include statistical diagnostics to support your conclusion, and to comment on your findings.}
 
 ```{r}
-lpm_model <- lm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
+lpm_model <- lm(diabetes ~ age + bmi + gender + hypertension + heart_disease
+                + smoking_history, 
                 data = diab_data)
 summary(lpm_model)
-bptest(lpm_model)
 hcErrors <- coeftest(lpm_model, vcov.=hccm(lpm_model, type = "hc1"))
 hcErrors
+```
 
-logit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
+
+```{r}
+logit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease
+                   + smoking_history, 
                    data = diab_data, family = binomial(link = "logit"))
 summary(logit_model)
 
-probit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease + smoking_history, 
+probit_model <- glm(diabetes ~ age + bmi + gender + hypertension + heart_disease
+                    + smoking_history, 
                     data = diab_data, family = binomial(link = "probit"))
 summary(probit_model)
+```
 
+```{r}
 comparison <- data.frame(
   Model = c("LPM", "Logit", "Probit"),
   AIC = c(AIC(lpm_model), AIC(logit_model), AIC(probit_model)),
@@ -338,3 +345,5 @@ comparison <- data.frame(
 comparison
 
 ```
+
+The AIC and BIC levels show that the LPM is the best model out of the three choices because AIC and BIC values for LPM are the lowest. 
