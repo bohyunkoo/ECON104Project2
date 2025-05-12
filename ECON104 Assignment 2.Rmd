@@ -345,5 +345,8 @@ comparison <- data.frame(
 comparison
 
 ```
-
 The AIC and BIC levels show that the LPM is the best model out of the three choices because AIC and BIC values for LPM are the lowest. 
+
+The AME for a Linear Probability Model is simply the coefficients of the variables, so there is no further calculation of these marginal effects needed. The marginal effects represent the change in the probability of having diabetes for a one-unit increase in each predictor, holding all other variables constant. A one-year increase in age is associated with an increase in the probability of having diabetes by approximately 0.1808\%. Each additional unit of BMI increases the probability of diabetes by about 0.5587\%. Males are approximately 1.987\% more likely to have diabetes than females, all else being equal. Having hypertension increases the probability of diabetes by about 13.04\% than not having hypertension. Individuals with heart disease are 15.53 \% more likely to have diabetes than those without heart disease. It is difficult to come to meaningful conclusions regarding smoking history and diabetes because there is a significant number of individuals who did not input their smoking history, and the categories of "Former," "Not Current," and "Ever" smokers are difficult to distinguish. However, after disregarding the smoking history category, the Linear Probability Model satisfies the original hypothesis that these factors contribute to the likelihood of an individual having diabetes as seen by the positive values in the marginal effects. 
+
+
